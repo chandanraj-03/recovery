@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-base: #EBE8E7;
+    --card-surface: #FFFFFF;
+    --card-surface-subtle: #F6F4F3;
+    --border-subtle: #E0DBD8;
+    --border-strong: #CEC8C4;
+    --text-primary: #1A1918;
+    --text-secondary: #65605C;
+    --text-muted: #8F8985;
+    --accent-primary: #2B59C3;
+    --accent-emerald: #0E7B58;
+    --accent-amber: #B45309;
+    --accent-rose: #C23B38;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #EBE8E7;
+}
+::-webkit-scrollbar-thumb {
+  background: #CEC8C4;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #AFA8A3;
+}
+
+/* Pulse badge animation */
+@keyframes agent-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+}
+
+.animate-agent-pulse {
+  animation: agent-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glassmorphic card styling for light theme */
+.glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(206, 200, 196, 0.8);
+  box-shadow: 0 4px 20px -2px rgba(26, 25, 24, 0.04), 0 2px 6px -1px rgba(26, 25, 24, 0.02);
+}
+
+.glass-card-subtle {
+  background: rgba(246, 244, 243, 0.9);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(224, 219, 216, 0.9);
+}
