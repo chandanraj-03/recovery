@@ -9,13 +9,36 @@ import {
   AuditTrailResponse,
 } from '../types';
 
-const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
-const normalizedApiUrl = rawApiUrl
-  ? rawApiUrl.startsWith('http')
-    ? rawApiUrl.replace(/\/$/, '')
-    : `https://${rawApiUrl.replace(/\/$/, '')}`
-  : '';
-export const API_BASE = normalizedApiUrl ? `${normalizedApiUrl}/api` : '/api';
+function getApiBase(): string {
+  // 1. Check for manual local override in browser
+  if (typeof window !== 'undefined') {
+    const override = localStorage.getItem('recoverai_api_url');
+    if (override) {
+      const clean = override.trim().replace(/\/$/, '');
+      return clean.endsWith('/api') ? clean : `${clean}/api`;
+    }
+  }
+
+  // 2. Read build-time VITE_API_URL
+  let rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+
+  // If Render passed an internal service name (e.g. "recoverai-backend-ts34" without TLD),
+  // append ".onrender.com" so client browsers can resolve it publicly over the internet
+  if (rawApiUrl && !rawApiUrl.includes('.') && !rawApiUrl.includes('localhost') && !rawApiUrl.includes(':')) {
+    rawApiUrl = `${rawApiUrl}.onrender.com`;
+  }
+
+  if (rawApiUrl) {
+    const withProtocol = rawApiUrl.startsWith('http') ? rawApiUrl : `https://${rawApiUrl}`;
+    const clean = withProtocol.replace(/\/$/, '');
+    return clean.endsWith('/api') ? clean : `${clean}/api`;
+  }
+
+  // 3. Fallback to same-origin relative /api
+  return '/api';
+}
+
+export const API_BASE = getApiBase();
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${url}`, {
