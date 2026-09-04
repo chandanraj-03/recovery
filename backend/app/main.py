@@ -62,6 +62,17 @@ app.include_router(agent.router, prefix="/api", tags=["Agent"])
 app.include_router(razorpay_api.router, prefix="/api", tags=["Razorpay"])
 
 
+@app.get("/")
+async def root():
+    return {
+        "service": "RecoverAI Agentic Recovery Platform",
+        "status": "online",
+        "mode": "simulation",
+        "health": "/api/health",
+        "docs": "/docs",
+    }
+
+
 @app.get("/api/health")
 async def health_check():
     return {"status": "ok", "mode": "simulation", "version": "1.0.0"}
