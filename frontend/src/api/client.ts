@@ -9,7 +9,13 @@ import {
   AuditTrailResponse,
 } from '../types';
 
-const API_BASE = '/api';
+const rawApiUrl = (import.meta.env.VITE_API_URL || '').trim();
+const normalizedApiUrl = rawApiUrl
+  ? rawApiUrl.startsWith('http')
+    ? rawApiUrl.replace(/\/$/, '')
+    : `https://${rawApiUrl.replace(/\/$/, '')}`
+  : '';
+export const API_BASE = normalizedApiUrl ? `${normalizedApiUrl}/api` : '/api';
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_BASE}${url}`, {

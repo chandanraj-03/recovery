@@ -45,9 +45,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartTour }) => {
       <header className="sticky top-0 z-40 w-full border-b border-[#CEC8C4] bg-[#EBE8E7]/90 backdrop-blur-md px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-6">
           <div className="flex items-center gap-3 shrink-0">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1A1918] text-[#EBE8E7] shadow-sm">
-              <Bot className="h-5 w-5 text-emerald-400" />
-            </div>
+            <img
+              src="/r_logo.png"
+              alt="RecoverAI Logo"
+              className="h-10 w-10 object-contain drop-shadow-xs shrink-0"
+            />
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-extrabold tracking-tight text-[#1A1918]">RecoverAI</span>
@@ -833,9 +835,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartTour }) => {
       <footer className="border-t border-[#CEC8C4] bg-[#EBE8E7] px-6 py-8 text-center text-xs text-[#706B67]">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="h-6 w-6 rounded-lg bg-[#1A1918] flex items-center justify-center text-emerald-400">
-              <Bot className="h-3.5 w-3.5" />
-            </div>
+            <img
+              src="/r_logo.png"
+              alt="RecoverAI Logo"
+              className="h-6 w-6 object-contain shrink-0"
+            />
             <span className="font-bold text-[#1A1918]">RecoverAI</span>
             <span>— Track 3: AI Revenue Recovery</span>
           </div>

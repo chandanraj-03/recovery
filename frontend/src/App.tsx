@@ -84,7 +84,7 @@ const AppContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#EBE8E7] text-[#1A1918] flex flex-col antialiased">
+    <div className="min-h-screen bg-[#EBE8E7] text-[#1A1918] flex flex-col antialiased w-full max-w-full overflow-x-hidden">
       {/* 1. Standalone Auth Pages (Login / Signup) */}
       {isAuthPage ? (
         <Routes>
@@ -110,10 +110,10 @@ const AppContent: React.FC = () => {
           />
 
           {/* Main Layout: Sidebar + Page Views */}
-          <div className="flex flex-1 overflow-hidden">
+          <div className="flex flex-1 overflow-hidden w-full">
             <Sidebar totalCasesCount={totalCases} onStartTour={handleStartTour} />
 
-            <main className="flex-1 overflow-y-auto p-6 lg:p-8 max-w-7xl mx-auto w-full">
+            <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full min-w-0">
               <Routes>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/cases" element={<RecoveryCasesPage />} />
