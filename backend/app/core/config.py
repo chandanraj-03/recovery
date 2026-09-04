@@ -17,14 +17,14 @@ class Settings(BaseSettings):
     # Simulation seed for reproducibility
     simulation_seed: int = 42
 
-    # Razorpay test credentials (optional)
-    razorpay_key_id: str = ""
-    razorpay_key_secret: str = ""
+    # Razorpay test credentials (defaults for Buildathon evaluation)
+    razorpay_key_id: str = os.getenv("RAZORPAY_KEY_ID", "rzp_test_TTMTXHnNcfT13u")
+    razorpay_key_secret: str = os.getenv("RAZORPAY_KEY_SECRET", "Hfd7v0IG95RXQC4E5FOyRMqv")
 
     # LLM / Groq Settings
-    llm_api_key: str = ""
-    groq_api_key: str = ""
-    groq_model: str = "openai/gpt-oss-120b"
+    llm_api_key: str = os.getenv("LLM_API_KEY", "")
+    groq_api_key: str = os.getenv("GROQ_API_KEY", "")
+    groq_model: str = os.getenv("GROQ_MODEL", "openai/gpt-oss-120b")
 
     # Policy defaults
     max_automatic_retries: int = 2
