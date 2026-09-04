@@ -6,8 +6,8 @@ services:
     plan: free
     region: oregon
     rootDir: backend
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
       - key: PYTHON_VERSION
@@ -16,12 +16,12 @@ services:
         value: 10000
 
   # 2. React + Vite Frontend (Free Static Site)
-  - type: static
+  # Note: Render Blueprints require type: web with runtime: static for static sites
+  - type: web
     name: recoverai-frontend
-    plan: free
-    region: oregon
+    runtime: static
     rootDir: frontend
-    buildCommand: "npm install && npm run build"
+    buildCommand: npm install && npm run build
     staticPublishPath: ./dist
     routes:
       - type: rewrite
