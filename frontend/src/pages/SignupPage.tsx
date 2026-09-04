@@ -42,9 +42,11 @@ export const SignupPage: React.FC = () => {
       {/* Top Brand Link */}
       <div className="sm:mx-auto sm:w-full sm:max-w-lg text-center">
         <Link to="/" className="inline-flex items-center gap-2.5 group">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1A1918] text-[#EBE8E7] shadow-sm group-hover:scale-105 transition-transform">
-            <Bot className="h-5 w-5 text-emerald-400" />
-          </div>
+          <img
+            src="/r_logo.png"
+            alt="RecoverAI Logo"
+            className="h-11 w-11 object-contain group-hover:scale-105 transition-transform drop-shadow-xs"
+          />
           <span className="text-2xl font-extrabold tracking-tight text-[#1A1918]">
             RecoverAI
           </span>

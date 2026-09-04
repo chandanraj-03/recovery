@@ -7,7 +7,9 @@
 # Pitch scripts & personal notes
 pitch_video_script.md
 pitch_video02.md
-
+/r_logo.png
+!frontend/public/r_logo.png
+!frontend/src/assets/r_logo.png
 # Python
 __pycache__/
 *.py[cod]

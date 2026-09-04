@@ -71,7 +71,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ totalCasesCount = 0, onStartTo
   ];
 
   return (
-    <aside className="flex w-64 flex-col border-r border-[#CEC8C4] bg-[#EBE8E7] p-4 text-[#1A1918]">
+    <aside className="flex w-64 flex-col border-r border-[#CEC8C4] bg-[#EBE8E7] p-4 text-[#1A1918] shrink-0">
       <div className="mb-2 px-3 py-1">
         <span className="text-[10px] font-bold tracking-wider text-[#8F8985] uppercase">
           Merchant Navigation
