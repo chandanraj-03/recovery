@@ -14,6 +14,12 @@ services:
         value: 3.11.9
       - key: PORT
         value: 10000
+      - key: RAZORPAY_KEY_ID
+        value: rzp_test_TTMTXHnNcfT13u
+      - key: RAZORPAY_KEY_SECRET
+        value: Hfd7v0IG95RXQC4E5FOyRMqv
+      - key: GROQ_API_KEY
+        sync: false
 
   # 2. React + Vite Frontend (Free Static Site)
   # Note: Render Blueprints require type: web with runtime: static for static sites
