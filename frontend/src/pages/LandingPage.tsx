@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Bot,
@@ -25,6 +25,9 @@ import {
   ShieldAlert,
   Mic,
   Zap,
+  Play,
+  Pause,
+  RotateCcw,
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -34,6 +37,148 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ onStartTour }) => {
   const navigate = useNavigate();
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
+  // Auto-scroll feature (smooth scroll to bottom in 20-25 seconds)
+  const [isAutoScrolling, setIsAutoScrolling] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [scrollDuration, setScrollDuration] = useState(22); // Default 22 seconds (within 20 to 25s)
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [timeRemaining, setTimeRemaining] = useState(22);
+
+  const animationFrameRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number | null>(null);
+  const startScrollYRef = useRef<number>(0);
+  const pausedTimeRef = useRef<number>(0);
+  const totalPausedDurationRef = useRef<number>(0);
+
+  const startAutoScroll = (customDuration?: number) => {
+    const duration = customDuration !== undefined ? customDuration : scrollDuration;
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+
+    const currentY = window.scrollY;
+    const maxScroll = Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight
+    );
+
+    // If already near bottom (within 50px), start from top
+    if (currentY >= maxScroll - 50) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      startScrollYRef.current = 0;
+    } else {
+      startScrollYRef.current = currentY;
+    }
+
+    startTimeRef.current = null;
+    pausedTimeRef.current = 0;
+    totalPausedDurationRef.current = 0;
+    setScrollProgress(0);
+    setTimeRemaining(duration);
+    setIsPaused(false);
+    setIsAutoScrolling(true);
+  };
+
+  const pauseAutoScroll = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    pausedTimeRef.current = performance.now();
+    setIsPaused(true);
+  };
+
+  const resumeAutoScroll = () => {
+    if (!isAutoScrolling) {
+      startAutoScroll();
+      return;
+    }
+    if (pausedTimeRef.current && startTimeRef.current) {
+      const pauseDuration = performance.now() - pausedTimeRef.current;
+      totalPausedDurationRef.current += pauseDuration;
+    }
+    setIsPaused(false);
+  };
+
+  const stopAutoScroll = () => {
+    if (animationFrameRef.current) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    setIsAutoScrolling(false);
+    setIsPaused(false);
+    setScrollProgress(0);
+    setTimeRemaining(scrollDuration);
+  };
+
+  const toggleAutoScroll = () => {
+    if (!isAutoScrolling) {
+      startAutoScroll();
+    } else if (isPaused) {
+      resumeAutoScroll();
+    } else {
+      pauseAutoScroll();
+    }
+  };
+
+  useEffect(() => {
+    if (!isAutoScrolling || isPaused) return;
+
+    const totalMs = scrollDuration * 1000;
+    const maxScroll = Math.max(
+      0,
+      document.documentElement.scrollHeight - window.innerHeight
+    );
+    const startY = startScrollYRef.current;
+    const distance = maxScroll - startY;
+
+    if (distance <= 0) {
+      setIsAutoScrolling(false);
+      return;
+    }
+
+    const step = (timestamp: number) => {
+      if (!startTimeRef.current) {
+        startTimeRef.current = timestamp;
+      }
+
+      const elapsed = timestamp - startTimeRef.current - totalPausedDurationRef.current;
+      const progress = Math.min(Math.max(elapsed / totalMs, 0), 1);
+
+      // Smooth steady linear scroll for clean video recording & constant reading speed
+      const targetY = startY + distance * progress;
+      window.scrollTo(0, targetY);
+
+      setScrollProgress(Math.round(progress * 100));
+      setTimeRemaining(Math.max(0, Math.ceil((totalMs - elapsed) / 1000)));
+
+      if (progress < 1 && window.scrollY < maxScroll - 5) {
+        animationFrameRef.current = requestAnimationFrame(step);
+      } else {
+        setIsAutoScrolling(false);
+        setScrollProgress(100);
+        setTimeRemaining(0);
+      }
+    };
+
+    animationFrameRef.current = requestAnimationFrame(step);
+
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, [isAutoScrolling, isPaused, scrollDuration]);
+
+  useEffect(() => {
+    return () => {
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+      }
+    };
+  }, []);
 
   const toggleFaq = (idx: number) => {
     setExpandedFaq(expandedFaq === idx ? null : idx);
@@ -71,10 +216,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartTour }) => {
             <a href="#judge-alignment" className="hover:text-[#1A1918] transition-colors">Judge Alignment</a>
           </nav>
 
-          <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {/* Auto-Scroll Button */}
+            <button
+              onClick={toggleAutoScroll}
+              title={isAutoScrolling && !isPaused ? "Pause Auto-Scroll" : `Auto-scroll page to bottom in ${scrollDuration}s`}
+              className={`flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all shadow-xs ${
+                isAutoScrolling && !isPaused
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-800 animate-pulse ring-2 ring-emerald-400/30'
+                  : isAutoScrolling && isPaused
+                  ? 'border-amber-400 bg-amber-50 text-amber-800'
+                  : 'border-[#CEC8C4] bg-[#FFFFFF] text-[#1A1918] hover:bg-[#F6F4F3]'
+              }`}
+            >
+              {isAutoScrolling && !isPaused ? (
+                <>
+                  <Pause className="h-3.5 w-3.5 text-emerald-600 fill-emerald-600" />
+                  <span>Pause ({timeRemaining}s)</span>
+                </>
+              ) : isAutoScrolling && isPaused ? (
+                <>
+                  <Play className="h-3.5 w-3.5 text-amber-600 fill-amber-600" />
+                  <span>Resume ({timeRemaining}s)</span>
+                </>
+              ) : (
+                <>
+                  <Play className="h-3.5 w-3.5 text-emerald-600 fill-emerald-600" />
+                  <span>Auto Scroll ({scrollDuration}s)</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={onStartTour}
-              className="flex items-center gap-1.5 rounded-xl border border-[#CEC8C4] bg-[#FFFFFF] px-3.5 py-2 text-xs font-bold text-[#1A1918] shadow-xs hover:bg-[#F6F4F3] transition-all"
+              className="hidden sm:flex items-center gap-1.5 rounded-xl border border-[#CEC8C4] bg-[#FFFFFF] px-3.5 py-2 text-xs font-bold text-[#1A1918] shadow-xs hover:bg-[#F6F4F3] transition-all"
             >
               <Compass className="h-4 w-4 text-blue-600" />
               <span>Take Tour</span>
@@ -120,8 +295,33 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartTour }) => {
               <ArrowRight className="h-4 w-4 text-emerald-400" />
             </button>
             <button
+              onClick={toggleAutoScroll}
+              className={`flex items-center gap-2 rounded-xl border px-5 py-3.5 text-sm font-bold shadow-xs transition-all active:scale-98 ${
+                isAutoScrolling && !isPaused
+                  ? 'border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-400/30'
+                  : 'border-[#CEC8C4] bg-[#FFFFFF] text-[#1A1918] hover:bg-[#F6F4F3]'
+              }`}
+            >
+              {isAutoScrolling && !isPaused ? (
+                <>
+                  <Pause className="h-4 w-4 text-emerald-600 fill-emerald-600" />
+                  <span>Pause Auto-Scroll ({timeRemaining}s)</span>
+                </>
+              ) : isAutoScrolling && isPaused ? (
+                <>
+                  <Play className="h-4 w-4 text-amber-600 fill-amber-600" />
+                  <span>Resume Auto-Scroll ({timeRemaining}s)</span>
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4 text-emerald-600 fill-emerald-600" />
+                  <span>Auto-Scroll Demo ({scrollDuration}s)</span>
+                </>
+              )}
+            </button>
+            <button
               onClick={onStartTour}
-              className="flex items-center gap-2 rounded-xl border border-[#CEC8C4] bg-[#FFFFFF] px-6 py-3.5 text-sm font-bold text-[#1A1918] shadow-sm hover:bg-[#F6F4F3] transition-all"
+              className="flex items-center gap-2 rounded-xl border border-[#CEC8C4] bg-[#FFFFFF] px-5 py-3.5 text-sm font-bold text-[#1A1918] shadow-sm hover:bg-[#F6F4F3] transition-all"
             >
               <Compass className="h-4 w-4 text-blue-600" />
               <span>Interactive Product Tour</span>
@@ -857,6 +1057,117 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStartTour }) => {
           </p>
         </div>
       </footer>
+
+      {/* Floating Auto-Scroll Controller Dock */}
+      {isAutoScrolling && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 rounded-2xl border border-[#CEC8C4] bg-[#1A1918]/95 px-4 py-3 text-white shadow-2xl backdrop-blur-md animate-in slide-in-from-bottom-5 duration-300">
+          <div className="flex items-center gap-2.5">
+            <div className="relative flex h-8 w-8 items-center justify-center">
+              <svg className="h-8 w-8 -rotate-90" viewBox="0 0 36 36">
+                <path
+                  className="text-white/20"
+                  strokeWidth="3.5"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+                <path
+                  className="text-emerald-400 transition-all duration-150"
+                  strokeDasharray={`${scrollProgress}, 100`}
+                  strokeWidth="3.5"
+                  strokeLinecap="round"
+                  stroke="currentColor"
+                  fill="none"
+                  d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                />
+              </svg>
+              <span className="absolute text-[10px] font-black text-emerald-400">
+                {timeRemaining}s
+              </span>
+            </div>
+
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs font-bold text-white">Auto-Scrolling</span>
+                <span className="rounded bg-emerald-500/20 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-300">
+                  {scrollProgress}%
+                </span>
+              </div>
+              <p className="text-[10px] text-white/60">
+                {isPaused ? 'Paused' : `Reaching bottom in ~${timeRemaining}s`}
+              </p>
+            </div>
+          </div>
+
+          {/* Speed / Duration Presets */}
+          <div className="flex items-center rounded-lg bg-white/10 p-0.5 text-[10px] font-bold">
+            <button
+              onClick={() => {
+                setScrollDuration(20);
+                startAutoScroll(20);
+              }}
+              title="Reach bottom in 20 seconds"
+              className={`rounded px-2 py-1 transition-colors ${
+                scrollDuration === 20 ? 'bg-emerald-500 text-white' : 'text-white/70 hover:text-white'
+              }`}
+            >
+              20s
+            </button>
+            <button
+              onClick={() => {
+                setScrollDuration(22);
+                startAutoScroll(22);
+              }}
+              title="Reach bottom in 22 seconds"
+              className={`rounded px-2 py-1 transition-colors ${
+                scrollDuration === 22 ? 'bg-emerald-500 text-white' : 'text-white/70 hover:text-white'
+              }`}
+            >
+              22s
+            </button>
+            <button
+              onClick={() => {
+                setScrollDuration(25);
+                startAutoScroll(25);
+              }}
+              title="Reach bottom in 25 seconds"
+              className={`rounded px-2 py-1 transition-colors ${
+                scrollDuration === 25 ? 'bg-emerald-500 text-white' : 'text-white/70 hover:text-white'
+              }`}
+            >
+              25s
+            </button>
+          </div>
+
+          {/* Control Buttons */}
+          <div className="flex items-center gap-1.5 border-l border-white/20 pl-2">
+            <button
+              onClick={isPaused ? resumeAutoScroll : pauseAutoScroll}
+              className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+              title={isPaused ? "Resume Auto-Scroll" : "Pause Auto-Scroll"}
+            >
+              {isPaused ? <Play className="h-3.5 w-3.5 fill-white" /> : <Pause className="h-3.5 w-3.5 fill-white" />}
+            </button>
+            <button
+              onClick={() => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                stopAutoScroll();
+              }}
+              className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors"
+              title="Scroll to Top & Reset"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+            </button>
+            <button
+              onClick={stopAutoScroll}
+              className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/10 text-white hover:bg-red-500/60 transition-colors"
+              title="Close Auto-Scroll"
+            >
+              <XCircle className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
