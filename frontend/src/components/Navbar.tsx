@@ -128,7 +128,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         )}
 
-        {/* Razorpay Judge Demo Trigger */}
+        {/* Razorpay Demo Trigger */}
         <button
           onClick={() => setShowRazorpayDemo(true)}
           title="Launch Live Razorpay Checkout for Judges"

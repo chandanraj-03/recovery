@@ -162,9 +162,6 @@ export const TransactionDetailPage: React.FC = () => {
               <h3 className="text-sm font-extrabold tracking-tight text-white">
                 Razorpay Autonomous Recovery Action
               </h3>
-              <span className="rounded-md bg-blue-400/20 px-2 py-0.5 text-[10px] font-bold text-blue-200 border border-blue-300/30">
-                Judge Demo Trigger
-              </span>
             </div>
             <p className="text-xs text-blue-100/80 mt-0.5">
               Execute live Razorpay payment gateway recovery for ₹{caseDetail.amount.toLocaleString('en-IN')} (UPI, QR, Cards).
